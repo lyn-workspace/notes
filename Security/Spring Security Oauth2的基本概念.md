@@ -1,4 +1,4 @@
-# Spring Security Oauth2的基本概念.md
+# Spring Security Oauth2的基本概念
 
 ## 1. 什么是认证
 
@@ -20,7 +20,7 @@
 
 他的交互流程是,用户认证成功后,在服务端生成用户相关的数据保存在`session`(当前会话中), 发给客户端的`session_id` 存放到`cookie` 中, 这样用户客户端请求时带上`session_id` 就可以验证服务器是否存在`session`数据 ,以此完成用户的合法校验,当用户退出系统或者`session` 过期销毁时,客户端的`session_id` 也就无效了. 
 
-![image-20200721212147642](Spring%20Security%20Oauth2%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.assets/image-20200721212147642.png)
+![image-20200724143422663](Spring%20Security%20Oauth2%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.assets/image-20200724143422663.png)
 
 
 
@@ -28,7 +28,7 @@
 
 他的交互流程是, 用户认证成功后,服务端生成一个`token` 发给客户端,客户端可以放到`cookie` 或者`localStorage` 等存储中,每次请求带上`token`, 服务端收到`token`后即可以确认用户的身份. 
 
-![image-20200721212624449](Spring%20Security%20Oauth2%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.assets/image-20200721212624449.png)
+![image-20200724143433746](Spring%20Security%20Oauth2%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.assets/image-20200724143433746.png)
 
 
 
