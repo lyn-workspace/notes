@@ -37,4 +37,157 @@
 
 如果只是为了使用的话, 我们可以下载编译好的版本
 
-![image-20200810161139368](Untitled.assets/image-20200810161139368.png)
+![image-20200811112833571](Spring%20Cloud%20Alibaba%E4%B9%8Bnaocs%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83.assets/image-20200811112833571.png)
+
+
+
+## 3. 编写客户端
+
+### 3.1 `pom.xml` 编写
+
+```xml
+
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
+        <spring-cloud-alibaba.version>2.2.1.RELEASE</spring-cloud-alibaba.version>
+        <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
+
+        <!--        <spring-boot.version>2.2.1.RELEASE</spring-boot.version>-->
+        <!--        <spring-cloud-alibaba.version>2.2.0.RELEASE</spring-cloud-alibaba.version>-->
+
+    </properties>
+   <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+
+
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
+```
+
+
+
+###  3.2 编写启动类
+
+```java
+@EnableDiscoveryClient
+@SpringBootApplication
+public class SpringCloudNacosDiscoveryClientApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringCloudNacosDiscoveryClientApplication.class, args);
+    }
+
+}
+
+```
+
+
+
+### 3.3 编写配置文件 `application.yml`
+
+```yaml
+spring:
+  application:
+    name: spring-cloud-nacos-discovery-client
+
+
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+server:
+  port: 12000
+
+```
+
+
+
+### 3.4  启动项目
+
+启动项目之前,确保之前安装的`nacos` 已经启动
+
+等项目启动成功后,我们访问`http://localhost:8848/nacos` nacos 的后台, 可以看到
+
+![image-20200811114603305](Spring%20Cloud%20Alibaba%E4%B9%8Bnaocs%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83.assets/image-20200811114603305.png)
+
+我们可以看到, `spring-cloud-nacos-discovery-client`  这个项目已经注册到了`nacos` 上面了. 
+
+
+
+`nacos` 中可以通过命名空间来区分不同的环境
+
+![image-20200811121858155](Spring%20Cloud%20Alibaba%E4%B9%8Bnaocs%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83.assets/image-20200811121858155.png)
+
+新建一个`dev`的命令空间,点击确定之后,我们会发现列表会多出来一条, 还有一个命令空间ID,
+
+![image-20200811121942740](Spring%20Cloud%20Alibaba%E4%B9%8Bnaocs%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83.assets/image-20200811121942740.png)
+
+这个ID就是我们所需要的, 我们复制这个id, 到项目的`application.yml`配置文件,修改配置文件为
+
+```yaml
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        ## 指定命令空间
+        namespace: d033967d-013d-4f01-9d23-8326105615ac
+```
+
+
+
+然后重启项目, 再次查看`nacos` 的控制台
+
+![image-20200811122215601](Spring%20Cloud%20Alibaba%E4%B9%8Bnaocs%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83.assets/image-20200811122215601.png)
+
+我们发现在原本的`public` 旁边多了一个`dev`的`tab`,点击`dev` 我们可以发现我们注册的服务. 
+
