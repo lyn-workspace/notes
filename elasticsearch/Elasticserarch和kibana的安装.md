@@ -482,7 +482,7 @@ green open .kibana_1                    dIEll9o5TJWPNr95Bfv9pw 1 0   57 49  1.8m
    {"name":"John Doe"}
    {"index":{"_id":"2"}}
    {"name":"John Doe"}
-    ```
+   ```
 
    
 
@@ -1363,4 +1363,730 @@ GET bank/_search
 }
 
 ```
+
+使用`match` 的`keyword`
+
+```json
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address.keyword": "990 Mill"
+    }
+  }
+}
+```
+
+查看结果, 一条也没有匹配到
+
+```json
+{
+  "took" : 34,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 0,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  }
+}
+
+```
+
+修改匹配条件为: `990 Mill Road`
+
+```json
+GET bank/_search
+{
+  "query": {
+    "match": {
+      "address.keyword": "990 Mill Road"
+    }
+  }
+}
+```
+
+查询出来一条数据
+
+```json
+{
+  "took" : 133,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 1,
+      "relation" : "eq"
+    },
+    "max_score" : 6.685111,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 6.685111,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+
+
+文本字段的匹配,使用`keyword`, 匹配的条件就是要显示字段的全部值,要进行精确匹配,`match_phrase` 是做短语匹配的,只要是文本中包含匹配条件,就能匹配到. 
+
+
+
+#### 4.3.5 `multi_math` 多字段匹配
+
+```json
+GET bank/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "mill",
+      "fields": [
+        "state",
+        "address"
+      ]
+    }
+  }
+}
+```
+
+`state` 或者`address` 中包含`mill`, 并且在查询的过程中 , 会对于查询条件进行分词. 
+
+查询结果:
+
+```json
+{
+  "took" : 121,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 4,
+      "relation" : "eq"
+    },
+    "max_score" : 5.4598455,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 5.4598455,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "136",
+        "_score" : 5.4598455,
+        "_source" : {
+          "account_number" : 136,
+          "balance" : 45801,
+          "firstname" : "Winnie",
+          "lastname" : "Holland",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "198 Mill Lane",
+          "employer" : "Neteria",
+          "email" : "winnieholland@neteria.com",
+          "city" : "Urie",
+          "state" : "IL"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "345",
+        "_score" : 5.4598455,
+        "_source" : {
+          "account_number" : 345,
+          "balance" : 9812,
+          "firstname" : "Parker",
+          "lastname" : "Hines",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "715 Mill Avenue",
+          "employer" : "Baluba",
+          "email" : "parkerhines@baluba.com",
+          "city" : "Blackgum",
+          "state" : "KY"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "472",
+        "_score" : 5.4598455,
+        "_source" : {
+          "account_number" : 472,
+          "balance" : 25571,
+          "firstname" : "Lee",
+          "lastname" : "Long",
+          "age" : 32,
+          "gender" : "F",
+          "address" : "288 Mill Street",
+          "employer" : "Comverges",
+          "email" : "leelong@comverges.com",
+          "city" : "Movico",
+          "state" : "MT"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+
+
+#### 4.3.6  `bool`  用来做复合查询
+
+复合语句可以合并,任何其他查询语句,包括复合语句,这也就是意味着复合语句之间可以互相嵌套,可以表达非常复杂的逻辑. 
+
+##### `must`:  必须达到`must` 所列举的所有条件
+
+```json
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "address": "mill"
+          }
+        },
+        {
+          "match": {
+            "gender": "M"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+ 查看`address=mill` 和`gender=M`的数据
+
+返回结果:
+
+```json
+{
+  "took" : 21,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 3,
+      "relation" : "eq"
+    },
+    "max_score" : 6.1390967,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "136",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 136,
+          "balance" : 45801,
+          "firstname" : "Winnie",
+          "lastname" : "Holland",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "198 Mill Lane",
+          "employer" : "Neteria",
+          "email" : "winnieholland@neteria.com",
+          "city" : "Urie",
+          "state" : "IL"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "345",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 345,
+          "balance" : 9812,
+          "firstname" : "Parker",
+          "lastname" : "Hines",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "715 Mill Avenue",
+          "employer" : "Baluba",
+          "email" : "parkerhines@baluba.com",
+          "city" : "Blackgum",
+          "state" : "KY"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+
+
+#####  `must not` 必须不匹配`must not` 所列举的所有条件
+
+查询`gender=M` 并且`address =mill`的,但是`age!=38`的数据
+
+```json
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "address": "mill"
+          }
+        },
+        {
+          "match": {
+            "gender": "M"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "age": "30"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+返回结果: 
+
+```json
+{
+  "took" : 90,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 3,
+      "relation" : "eq"
+    },
+    "max_score" : 6.1390967,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "136",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 136,
+          "balance" : 45801,
+          "firstname" : "Winnie",
+          "lastname" : "Holland",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "198 Mill Lane",
+          "employer" : "Neteria",
+          "email" : "winnieholland@neteria.com",
+          "city" : "Urie",
+          "state" : "IL"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "345",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 345,
+          "balance" : 9812,
+          "firstname" : "Parker",
+          "lastname" : "Hines",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "715 Mill Avenue",
+          "employer" : "Baluba",
+          "email" : "parkerhines@baluba.com",
+          "city" : "Blackgum",
+          "state" : "KY"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+
+
+#####  `should`  应该达到`should`   列举的条件,如果达到就会增加相关文档的评分, 并不会改变查询的结果, 如果`query` 中只有`should`   且只有一种匹配规则,那么`should`  的条件就会被作为默认匹配条件去改变查询结果
+
+例子: 匹配`lastName` 应该等于`Wallace`的数据
+
+```json
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "address": "mill"
+          }
+        },
+        {
+          "match": {
+            "gender": "M"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "age": "30"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "lastname": "Wallace"
+          }
+        }
+      ]
+    }
+  }
+}
+
+```
+
+
+
+返回结果: 
+
+```json
+{
+  "took" : 18145,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 3,
+      "relation" : "eq"
+    },
+    "max_score" : 12.824207,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 12.824207,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "136",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 136,
+          "balance" : 45801,
+          "firstname" : "Winnie",
+          "lastname" : "Holland",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "198 Mill Lane",
+          "employer" : "Neteria",
+          "email" : "winnieholland@neteria.com",
+          "city" : "Urie",
+          "state" : "IL"
+        }
+      },
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "345",
+        "_score" : 6.1390967,
+        "_source" : {
+          "account_number" : 345,
+          "balance" : 9812,
+          "firstname" : "Parker",
+          "lastname" : "Hines",
+          "age" : 38,
+          "gender" : "M",
+          "address" : "715 Mill Avenue",
+          "employer" : "Baluba",
+          "email" : "parkerhines@baluba.com",
+          "city" : "Blackgum",
+          "state" : "KY"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+能够看到相关度越高,得分也就越高
+
+#### 4.3.7 `Filter`  结果过滤
+
+并不是所有的查询都需要产生分数,特别是哪些仅用于`filter` 过滤的文档 . 为了不计算分数,`es` 会自动检查场景并且优化查询的执行
+
+```json
+
+GET bank/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "address": "mill"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "balance": {
+              "gte": 10000,
+              "lte": 20000
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+```
+
+这里先查询所有匹配`address=mill`的文档,然后再根据`10000<=balance<=20000`进行结果查询, 查询结果:
+
+```json
+{
+  "took" : 66,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 1,
+      "relation" : "eq"
+    },
+    "max_score" : 5.4598455,
+    "hits" : [
+      {
+        "_index" : "bank",
+        "_type" : "account",
+        "_id" : "970",
+        "_score" : 5.4598455,
+        "_source" : {
+          "account_number" : 970,
+          "balance" : 19648,
+          "firstname" : "Forbes",
+          "lastname" : "Wallace",
+          "age" : 28,
+          "gender" : "M",
+          "address" : "990 Mill Road",
+          "employer" : "Pheast",
+          "email" : "forbeswallace@pheast.com",
+          "city" : "Lopezo",
+          "state" : "AK"
+        }
+      }
+    ]
+  }
+}
+
+```
+
+Each `must`, `should`, and `must_not` element in a Boolean query is referred to as a query clause. How well a document meets the criteria in each `must` or `should` clause contributes to the document’s _relevance score_. The higher the score, the better the document matches your search criteria. By default, Elasticsearch returns documents ranked by these relevance scores.
+在boolean查询中，`must`, `should` 和`must_not` 元素都被称为查询子句 。 文档是否符合每个“must”或“should”子句中的标准，决定了文档的“相关性得分”。  得分越高，文档越符合您的搜索条件。  默认情况下，Elasticsearch返回根据这些相关性得分排序的文档。
+The criteria in a `must_not` clause is treated as a _filter_. It affects whether or not the document is included in the results, but does not contribute to how documents are scored. You can also explicitly specify arbitrary filters to include or exclude documents based on structured data.
+
+`“must_not”子句中的条件被视为“过滤器”。` 它影响文档是否包含在结果中，  但不影响文档的评分方式。  还可以显式地指定任意过滤器来包含或排除基于结构化数据的文档。
+
+`filter` 在使用过程中,并不会计算相关性得分
+
+#### 4.3.8 `term`
+
+和`match` 一样,匹配某个属性的值,全文检索字段用`match`, 其他非`text`字段匹配用`term`
+
+> Avoid using the `term` query for [`text`](https:_www.elastic.co_guide_en_elasticsearch_reference_7.6_text) fields.
+> 避免对文本字段使用“term”查询
+> By default, Elasticsearch changes the values of `text` fields as part of [analysis](). This can make finding exact matches for `text` field values difficult.
+> 默认情况下，Elasticsearch作为[analysis]()的一部分更改' text '字段的值。这使得为“text”字段值寻找精确匹配变得困难。
+> To search `text` field values, use the match.
+> 要搜索“text”字段值，请使用匹配。
+> [https://www.elastic.co/guide/en/elasticsearch/reference/7.6/query-dsl-term-query.html](
+
+使用`term` 匹配查询
+
+```json
+
+GET bank/_search
+{
+  "query": {
+    "term": {
+      "address": {
+        "value": "mill Road"
+      }
+    }
+  }
+}
+```
+
+返回结果: 
+
+```json
+{
+  "took" : 26,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 1,
+    "successful" : 1,
+    "skipped" : 0,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : {
+      "value" : 0,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  }
+}
+
+```
+
+一条也没有匹配到, 更换为`match`后, 就可以匹配到32个
+
+也就是说, 全文检索字段用`match`, 其他非`text` 字段匹配用`match`
+
+#### 4.3.9 `Aggregation` 执行聚合
 
