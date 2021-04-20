@@ -120,7 +120,7 @@ $ sudo apt-get update
 安装 apt 依赖包，用于通过HTTPS来获取仓库:
 
 ```bash
-$ **sudo** **apt-get install** \
+$ sudo apt-get install \
   apt-transport-https \
   ca-certificates \
   curl \
