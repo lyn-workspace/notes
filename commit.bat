@@ -3,3 +3,4 @@ set work_path=Dir
 echo "-----------"
 git add .
 git commit -m "cron  commit"
+git push
